@@ -3,6 +3,7 @@
 
   const SUBS = ['orslokx','memexico','yo_ctm','dankgentina','latesitoo','mediomemes','maau'];
   function getAPI() { return 'https://meme-api.com/gimme/' + SUBS[Math.floor(Math.random() * SUBS.length)]; }
+  const SDK = 'show_11026821';
 
   const container = document.getElementById('meme-container');
   const loader = document.getElementById('loader');
@@ -33,6 +34,21 @@
     document.documentElement.style.setProperty('--tg-theme-hint-color', tg.WebApp.hintColor || '#888');
     document.documentElement.style.setProperty('--tg-theme-button-color', tg.WebApp.buttonColor || '#2ea6ff');
     document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.WebApp.secondaryBackgroundColor || '#16213e');
+  }
+
+  function showInterstitial() {
+    if (typeof window[SDK] === 'function') {
+      window[SDK]({
+        type: 'inApp',
+        inAppSettings: {
+          frequency: 5,
+          capping: 0.03,
+          interval: 10,
+          timeout: 2,
+          everyPage: false
+        }
+      });
+    }
   }
 
   function showLoader() {
@@ -72,6 +88,8 @@
         content.classList.remove('hidden');
         shareBtn.classList.remove('hidden');
 
+        if (count % 2 === 0) showInterstitial();
+
         if (count % 3 === 0) {
           adBtn.textContent = '🎬 Ver anuncio + bonus';
           adBtn.classList.remove('hidden');
@@ -98,13 +116,14 @@
   function handleAd() {
     adBtn.disabled = true;
     adBtn.textContent = 'Cargando...';
-    const SDK = window.show_11025846;
-    if (typeof SDK === 'function') {
-      SDK().then(() => {
+    const fn = window[SDK];
+    if (typeof fn === 'function') {
+      fn().then(() => {
         adBtn.classList.add('hidden');
         adBtn.disabled = false;
-        count += 2;
+        count += 3;
         counter.textContent = count + ' memes vistos';
+        showInterstitial();
         fetchMeme();
       }).catch(() => {
         adBtn.disabled = false;
@@ -114,7 +133,7 @@
       setTimeout(() => {
         adBtn.classList.add('hidden');
         adBtn.disabled = false;
-        count += 2;
+        count += 3;
         counter.textContent = count + ' memes vistos';
         fetchMeme();
       }, 1000);
@@ -139,4 +158,7 @@
 
   initTelegram();
   fetchMeme();
+
+  setTimeout(showInterstitial, 3000);
+  setInterval(showInterstitial, 45000);
 })();
