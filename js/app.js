@@ -1,7 +1,8 @@
 ;(function() {
   'use strict';
 
-  const API = 'https://meme-api.com/gimme';
+  const SUBS = ['orslokx','memexico','yo_ctm','dankgentina','latesitoo','mediomemes','maau'];
+  function getAPI() { return 'https://meme-api.com/gimme/' + SUBS[Math.floor(Math.random() * SUBS.length)]; }
 
   const container = document.getElementById('meme-container');
   const loader = document.getElementById('loader');
@@ -50,7 +51,7 @@
     if (memeBtn.disabled) return;
     showLoader();
 
-    fetch(API)
+    fetch(getAPI())
       .then(r => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
