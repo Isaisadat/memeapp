@@ -3,7 +3,7 @@
 
   const SUBS = ['orslokx','memexico','yo_ctm','dankgentina','latesitoo','mediomemes','maau'];
   function getAPI() { return 'https://meme-api.com/gimme/' + SUBS[Math.floor(Math.random() * SUBS.length)]; }
-  const SDK = 'show_11026821';
+  const SDK_NAME = 'show_11026821';
 
   const container = document.getElementById('meme-container');
   const loader = document.getElementById('loader');
@@ -22,6 +22,21 @@
   let currentUrl = '';
   let currentTitle = '';
 
+  function waitForSDK(retries = 20) {
+    return new Promise((resolve, reject) => {
+      function check(n) {
+        if (typeof window[SDK_NAME] === 'function') {
+          resolve(true);
+        } else if (n <= 0) {
+          reject(new Error('SDK timeout'));
+        } else {
+          setTimeout(() => check(n - 1), 500);
+        }
+      }
+      check(retries);
+    });
+  }
+
   function initTelegram() {
     const tg = window.Telegram = window.Telegram || {};
     tg.WebApp = tg.WebApp || {};
@@ -36,9 +51,10 @@
     document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.WebApp.secondaryBackgroundColor || '#16213e');
   }
 
-  function showInterstitial() {
-    if (typeof window[SDK] === 'function') {
-      window[SDK]({
+  async function showInterstitial() {
+    try {
+      await waitForSDK(8);
+      window[SDK_NAME]({
         type: 'inApp',
         inAppSettings: {
           frequency: 5,
@@ -48,6 +64,16 @@
           everyPage: false
         }
       });
+    } catch (e) {}
+  }
+
+  async function showRewarded() {
+    try {
+      await waitForSDK();
+      return await window[SDK_NAME]();
+    } catch (e) {
+      await new Promise(r => setTimeout(r, 800));
+      return 'fallback';
     }
   }
 
@@ -61,6 +87,11 @@
   function hideLoader() {
     loader.classList.add('hidden');
     memeBtn.disabled = false;
+  }
+
+  function showAdBtn() {
+    adBtn.textContent = '🎬 Ver anuncio + bonus';
+    adBtn.classList.remove('hidden');
   }
 
   function fetchMeme() {
@@ -89,11 +120,7 @@
         shareBtn.classList.remove('hidden');
 
         if (count % 2 === 0) showInterstitial();
-
-        if (count % 3 === 0) {
-          adBtn.textContent = '🎬 Ver anuncio + bonus';
-          adBtn.classList.remove('hidden');
-        }
+        if (count % 2 === 0) showAdBtn();
       })
       .catch(err => {
         hideLoader();
@@ -108,35 +135,24 @@
     if (tg?.initData) {
       tg.shareToStory?.(currentUrl) || tg.shareUrl?.(currentUrl);
     } else {
-      const text = encodeURIComponent(currentTitle + '\n' + currentUrl);
       window.open('https://t.me/share/url?url=' + encodeURIComponent(currentUrl) + '&text=' + encodeURIComponent(currentTitle));
     }
   }
 
-  function handleAd() {
+  async function handleAd() {
     adBtn.disabled = true;
     adBtn.textContent = 'Cargando...';
-    const fn = window[SDK];
-    if (typeof fn === 'function') {
-      fn().then(() => {
-        adBtn.classList.add('hidden');
-        adBtn.disabled = false;
-        count += 3;
-        counter.textContent = count + ' memes vistos';
-        showInterstitial();
-        fetchMeme();
-      }).catch(() => {
-        adBtn.disabled = false;
-        adBtn.textContent = '🎬 Ver anuncio + bonus';
-      });
-    } else {
-      setTimeout(() => {
-        adBtn.classList.add('hidden');
-        adBtn.disabled = false;
-        count += 3;
-        counter.textContent = count + ' memes vistos';
-        fetchMeme();
-      }, 1000);
+    try {
+      await showRewarded();
+      adBtn.classList.add('hidden');
+      adBtn.disabled = false;
+      count += 3;
+      counter.textContent = count + ' memes vistos';
+      showInterstitial();
+      fetchMeme();
+    } catch (e) {
+      adBtn.disabled = false;
+      adBtn.textContent = '🎬 Ver anuncio + bonus';
     }
   }
 
@@ -144,7 +160,6 @@
   memeBtn.addEventListener('touchend', e => { e.preventDefault(); fetchMeme(); });
   shareBtn.addEventListener('click', shareMeme);
   adBtn.addEventListener('click', handleAd);
-
   image.addEventListener('dragstart', e => e.preventDefault());
 
   let touchY = 0;
@@ -159,6 +174,6 @@
   initTelegram();
   fetchMeme();
 
-  setTimeout(showInterstitial, 3000);
-  setInterval(showInterstitial, 45000);
+  setTimeout(() => showInterstitial(), 4000);
+  setInterval(() => showInterstitial(), 45000);
 })();
