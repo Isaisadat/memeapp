@@ -51,21 +51,18 @@
     document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.WebApp.secondaryBackgroundColor || '#16213e');
   }
 
-  async function showInterstitial() {
+  async function showVideoAd() {
     try {
       await waitForSDK(8);
-      await window[SDK_NAME]('pop').catch(() => {});
+      await window[SDK_NAME]().catch(() => {});
     } catch (e) {}
   }
 
-  async function showRewarded() {
+  async function showPopupAd() {
     try {
       await waitForSDK();
-      return await window[SDK_NAME]();
-    } catch (e) {
-      await new Promise(r => setTimeout(r, 800));
-      return 'fallback';
-    }
+      await window[SDK_NAME]('pop').catch(() => {});
+    } catch (e) {}
   }
 
   function showLoader() {
@@ -81,7 +78,7 @@
   }
 
   function showAdBtn() {
-    adBtn.textContent = '🎬 Ver anuncio + bonus';
+    adBtn.textContent = '🎬 Ver oferta + bonus';
     adBtn.classList.remove('hidden');
   }
 
@@ -110,13 +107,12 @@
         content.classList.remove('hidden');
         shareBtn.classList.remove('hidden');
 
-        if (count % 2 === 0) showInterstitial();
+        if (count % 2 === 0) showVideoAd();
         showAdBtn();
       })
       .catch(err => {
         hideLoader();
         errorMsg.classList.remove('hidden');
-        console.error('Meme fetch error:', err);
       });
   }
 
@@ -133,18 +129,12 @@
   async function handleAd() {
     adBtn.disabled = true;
     adBtn.textContent = 'Cargando...';
-    try {
-      await showRewarded();
-      adBtn.classList.add('hidden');
-      adBtn.disabled = false;
-      count += 3;
-      counter.textContent = count + ' memes vistos';
-      showInterstitial();
-      fetchMeme();
-    } catch (e) {
-      adBtn.disabled = false;
-      adBtn.textContent = '🎬 Ver anuncio + bonus';
-    }
+    await showPopupAd();
+    adBtn.classList.add('hidden');
+    adBtn.disabled = false;
+    count += 3;
+    counter.textContent = count + ' memes vistos';
+    fetchMeme();
   }
 
   memeBtn.addEventListener('click', fetchMeme);
@@ -165,6 +155,6 @@
   initTelegram();
   fetchMeme();
 
-  setTimeout(() => showInterstitial(), 5000);
-  setInterval(() => showInterstitial(), 30000);
+  setTimeout(() => showVideoAd(), 5000);
+  setInterval(() => showVideoAd(), 30000);
 })();
