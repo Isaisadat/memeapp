@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Meme Gallery</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src='https://libtl.com/sdk.js' data-zone='11025846' data-sdk='show_11025846'></script>
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <h1>🎭 Meme Gallery</h1>
+      <p class="subtitle">Memes aleatorios de Reddit</p>
+    </div>
+
+    <div id="meme-container" class="meme-container">
+      <div id="loader" class="loader">Cargando...</div>
+      <div id="meme-content" class="meme-content hidden">
+        <img id="meme-image" class="meme-image" alt="Meme">
+        <div class="meme-info">
+          <h3 id="meme-title" class="meme-title"></h3>
+          <div class="meme-meta">
+            <span id="meme-author"></span>
+            <span id="meme-ups">⬆️ </span>
+          </div>
+        </div>
+      </div>
+      <div id="error-msg" class="error hidden">Error al cargar meme 😅</div>
+    </div>
+
+    <div class="actions">
+      <button id="meme-btn" class="primary-btn">🎲 Siguiente meme</button>
+      <button id="share-btn" class="secondary-btn hidden">📤 Compartir</button>
+      <button class="ad-btn hidden" id="meme-ad-btn" data-ad="meme">🎬 Ver anuncio + bonus</button>
+    </div>
+
+    <div class="footer">
+      <span id="counter">0 memes vistos</span>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
