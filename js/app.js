@@ -54,16 +54,7 @@
   async function showInterstitial() {
     try {
       await waitForSDK(8);
-      window[SDK_NAME]({
-        type: 'inApp',
-        inAppSettings: {
-          frequency: 5,
-          capping: 0.03,
-          interval: 10,
-          timeout: 2,
-          everyPage: false
-        }
-      });
+      await window[SDK_NAME]('pop').catch(() => {});
     } catch (e) {}
   }
 
@@ -120,7 +111,7 @@
         shareBtn.classList.remove('hidden');
 
         if (count % 2 === 0) showInterstitial();
-        if (count % 2 === 0) showAdBtn();
+        showAdBtn();
       })
       .catch(err => {
         hideLoader();
@@ -174,6 +165,6 @@
   initTelegram();
   fetchMeme();
 
-  setTimeout(() => showInterstitial(), 4000);
-  setInterval(() => showInterstitial(), 45000);
+  setTimeout(() => showInterstitial(), 5000);
+  setInterval(() => showInterstitial(), 30000);
 })();
